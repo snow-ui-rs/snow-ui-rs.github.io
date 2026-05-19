@@ -408,7 +408,7 @@
 <span class="kw">async fn</span> <span class="fn-name">login</span>(form: &amp;<span class="ty">Form</span>) -&gt; anyhow::<span class="ty">Result</span>&lt;()&gt; {
     <span class="kw">let</span> json = form.<span class="fn-name">to_json</span>()?;
     <span class="kw">let</span> api = <span class="ty">ServerApi</span>::<span class="fn-name">new</span>(<span class="str">"https://api.example.com/login"</span>);
-    api.<span class="fn-name">post_json</span>(json).<span class="kw">await</span>?;
+    api.<span class="fn-name">post_json</span>(&json).<span class="kw">await</span>?;
     <span class="fn-name">event_bus</span>().<span class="fn-name">send</span>(<span class="ty">LoginSuccess</span> {});
     <span class="ty">Ok</span>(())
 }
