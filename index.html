@@ -328,6 +328,7 @@
 <span class="kw">struct</span> <span class="ty">SimpleTextTimer</span> {
     seconds: <span class="ty">State</span>&lt;<span class="ty">u128</span>&gt;,
     timer: <span class="ty">IntervalTimer</span>&lt;<span class="ty">SimpleTextTimerTickEvent</span>&gt;,
+    text: <span class="ty">Text</span>,
 }
 
 <span class="mac">register_handler!</span>(
@@ -340,12 +341,38 @@
 );
 
 <span class="kw">fn</span> <span class="fn-name">simple_text_timer</span>() -&gt; <span class="ty">Object</span> {
+    <span class="kw">let</span> seconds = <span class="ty">State</span>::<span class="fn-name">new</span>(<span class="num">0</span>);
     <span class="mac">obj!</span>(<span class="ty">SimpleTextTimer</span> {
-        seconds: <span class="ty">State</span>::<span class="fn-name">new</span>(<span class="num">0</span>),
+        seconds: seconds.<span class="fn-name">clone</span>(),
         timer: <span class="ty">IntervalTimer</span>::<span class="fn-name">from_interval</span>(
             Duration::<span class="fn-name">from_secs</span>(<span class="num">1</span>)
         ),
+        text: <span class="ty">Text</span>::<span class="fn-name">from_state</span>(&amp;seconds),
     })
+}
+
+<span class="kw">fn</span> <span class="fn-name">world</span>() -&gt; <span class="ty">World</span> {
+    <span class="ty">World</span> {
+        root: <span class="mac">obj!</span>(<span class="ty">Board</span> {
+            width: VIEWPORT_WIDTH,
+            height: VIEWPORT_HEIGHT,
+            h_align: <span class="ty">HAlign</span>::Center,
+            v_align: <span class="ty">VAlign</span>::Middle,
+            children: <span class="mac">list!</span>[<span class="ty">Card</span> {
+                children: <span class="mac">list!</span>[
+                    <span class="ty">Row</span> {
+                        children: <span class="mac">list!</span>[<span class="ty">Text</span> {
+                            text: <span class="str">"Timer Example ⏱️"</span>,
+                        }],
+                    },
+                    <span class="ty">Row</span> {
+                        children: <span class="mac">list!</span>[<span class="fn-name">simple_text_timer</span>()],
+                    },
+                ],
+            }],
+        }),
+        ..<span class="fn-name">default</span>()
+    }
 }
 
 <span class="kw">fn</span> <span class="fn-name">main</span>() {
@@ -361,7 +388,9 @@
 <span class="kw">struct</span> <span class="ty">IncreaseButtonClicked</span> {}
 
 <span class="attr">#[element]</span>
-<span class="kw">struct</span> <span class="ty">IncreaseButton</span> { button: <span class="ty">Button</span> }
+<span class="kw">struct</span> <span class="ty">IncreaseButton</span> {
+    button: <span class="ty">Button</span>,
+}
 
 <span class="kw">impl</span> <span class="ty">ClickHandler</span> <span class="kw">for</span> <span class="ty">IncreaseButton</span> {
     <span class="kw">async fn</span> <span class="fn-name">on_click</span>(&amp;<span class="kw">mut</span> self) {
@@ -369,8 +398,19 @@
     }
 }
 
+<span class="kw">fn</span> <span class="fn-name">increase_button</span>() -&gt; <span class="ty">Object</span> {
+    <span class="mac">obj!</span>(<span class="ty">IncreaseButton</span> {
+        button: <span class="ty">Button</span> {
+            text: <span class="str">"Increase Count"</span>,
+        },
+    })
+}
+
 <span class="attr">#[element]</span>
-<span class="kw">struct</span> <span class="ty">SimpleText</span> { count: <span class="ty">State</span>&lt;<span class="ty">u128</span>&gt; }
+<span class="kw">struct</span> <span class="ty">SimpleText</span> {
+    count: <span class="ty">State</span>&lt;<span class="ty">u128</span>&gt;,
+    text: <span class="ty">Text</span>,
+}
 
 <span class="mac">register_handler!</span>(
     <span class="kw">impl</span> <span class="ty">MessageHandler</span>&lt;<span class="ty">IncreaseButtonClicked</span>&gt; <span class="kw">for</span> <span class="ty">SimpleText</span> {
@@ -381,13 +421,29 @@
     }
 );
 
+<span class="kw">fn</span> <span class="fn-name">simple_text</span>() -&gt; <span class="ty">Object</span> {
+    <span class="kw">let</span> count = <span class="ty">State</span>::<span class="fn-name">new</span>(<span class="num">0</span>);
+    <span class="mac">obj!</span>(<span class="ty">SimpleText</span> {
+        count: count.<span class="fn-name">clone</span>(),
+        text: <span class="ty">Text</span>::<span class="fn-name">from_state</span>(&amp;count),
+    })
+}
+
 <span class="kw">fn</span> <span class="fn-name">world</span>() -&gt; <span class="ty">World</span> {
     <span class="ty">World</span> {
         root: <span class="mac">obj!</span>(<span class="ty">Board</span> {
+            width: VIEWPORT_WIDTH,
+            height: VIEWPORT_HEIGHT,
+            h_align: <span class="ty">HAlign</span>::Center,
+            v_align: <span class="ty">VAlign</span>::Middle,
             children: <span class="mac">list!</span>[<span class="ty">Card</span> {
                 children: <span class="mac">list!</span>[
-                    <span class="ty">Row</span> { children: <span class="mac">list!</span>[<span class="fn-name">increase_button</span>()], },
-                    <span class="ty">Row</span> { children: <span class="mac">list!</span>[<span class="fn-name">simple_text</span>()], },
+                    <span class="ty">Row</span> {
+                        children: <span class="mac">list!</span>[<span class="fn-name">increase_button</span>(),],
+                    },
+                    <span class="ty">Row</span> {
+                        children: <span class="mac">list!</span>[<span class="fn-name">simple_text</span>(),],
+                    },
                 ],
             }],
         }),
@@ -395,7 +451,9 @@
     }
 }
 
-<span class="kw">fn</span> <span class="fn-name">main</span>() { snow_ui::<span class="fn-name">launch</span>(world); }</pre>
+<span class="kw">fn</span> <span class="fn-name">main</span>() {
+    snow_ui::<span class="fn-name">launch</span>(world);
+}</pre>
         </div>
 
         <!-- Login -->
